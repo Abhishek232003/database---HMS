@@ -28,7 +28,7 @@ Ensured data consistency and relational integrity between entities.
 
 MySQL – Database schema design and management
 
-Backend – Student login & dashboard functionality
+Backend(Django) – Student login & dashboard functionality
 
 📖 Outcome
 
