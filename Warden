@@ -1,0 +1,47 @@
+-- Create the WARDERN table
+CREATE TABLE WARDERN (
+    WARDERNID INT PRIMARY KEY,
+    WARDERNAME VARCHAR(100),
+    WARDERNAGE INT,
+    WARDERNSERVICEPERIOD INT,
+    WARDERNDUTYTIMINGS VARCHAR(100),
+    WARDERNPASSWORD VARCHAR(128)
+);
+
+-- Create a view for WARDERN to see specific student columns
+CREATE VIEW WARDERN_STUDENT_VIEW AS
+SELECT
+    STDNAME,
+    STDAGE,
+    STDADDRESS,
+    STDPASSOUTYEAR
+FROM STUDENTS;
+
+-- Combined view for wardern to see all room statistics
+CREATE VIEW WARDERN_ROOM_STATS AS
+SELECT
+  (SELECT COUNT(*) FROM ROOM) AS TotalRooms,
+  (SELECT COUNT(*) FROM ROOM WHERE StudentID IS NOT NULL) AS RoomsOccupied,
+  (SELECT COUNT(*) FROM ROOM WHERE StudentID IS NULL) AS RoomsAvailable;
+
+-- View for warderns to see all complaints written by students
+CREATE OR REPLACE VIEW WARDERN_COMPLAINTS_VIEW AS
+SELECT C.ComplaintID, C.STDID, S.STDNAME, C.RoomNumber, C.ComplaintText, C.ComplaintDate, C.Status
+FROM Complaints C
+LEFT JOIN STUDENTS S ON C.STDID = S.STDID;
+
+-- View for wardern to see room details and student occupancy
+CREATE OR REPLACE VIEW WARDERN_ROOM_DETAILS AS
+SELECT
+    R.RoomNumber,
+    R.RoomType,
+    CASE
+        WHEN R.StudentID IS NULL THEN 'Available'
+        ELSE 'Occupied'
+    END AS Status,
+    S.STDID,
+    S.STDNAME
+FROM
+    ROOM R
+LEFT JOIN
+    STUDENTS S ON R.StudentID = S.STDID;
