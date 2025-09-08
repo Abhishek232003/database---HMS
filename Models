@@ -1,0 +1,51 @@
+from django.db import models
+
+# Create your models here.
+
+class Students(models.Model):
+    stdid = models.IntegerField(primary_key=True, db_column='STDID')
+    stdname = models.CharField(max_length=100, db_column='STDNAME')
+    stddegree = models.CharField(max_length=100, db_column='STDDEGREE')
+    stdpassoutyear = models.IntegerField(db_column='STDPASSOUTYEAR')
+    stdage = models.IntegerField(db_column='STDAGE')
+    stdaddress = models.CharField(max_length=255, db_column='STDADDRESS')
+    class_field = models.CharField(max_length=50, db_column='CLASS')
+    section = models.CharField(max_length=10, db_column='SECTION')
+
+    class Meta:
+        managed = False
+        db_table = 'STUDENTS'
+
+class Wardern(models.Model):
+    wardernid = models.IntegerField(primary_key=True, db_column='WARDERNID')
+    wardername = models.CharField(max_length=100, db_column='WARDERNAME')
+    wardernage = models.IntegerField(db_column='WARDERNAGE')
+    wardernserviceperiod = models.IntegerField(db_column='WARDERNSERVICEPERIOD')
+    warderndutytimings = models.CharField(max_length=100, db_column='WARDERNDUTYTIMINGS')
+    wardernpassword = models.CharField(max_length=128, db_column='WARDERNPASSWORD')
+
+    class Meta:
+        managed = False
+        db_table = 'WARDERN'
+
+class Room(models.Model):
+    roomnumber = models.CharField(max_length=20, primary_key=True, db_column='RoomNumber')
+    roomtype = models.CharField(max_length=10, db_column='RoomType')
+    floor = models.IntegerField(db_column='Floor')
+    studentid = models.IntegerField(null=True, db_column='StudentID')
+
+    class Meta:
+        managed = False
+        db_table = 'ROOM'
+
+class Complaints(models.Model):
+    complaintid = models.IntegerField(primary_key=True, db_column='ComplaintID')
+    stdid = models.IntegerField(db_column='STDID')
+    roomnumber = models.CharField(max_length=20, db_column='RoomNumber')
+    complainttext = models.TextField(db_column='ComplaintText')
+    complaintdate = models.DateField(db_column='ComplaintDate')
+    status = models.CharField(max_length=50, db_column='Status')
+
+    class Meta:
+        managed = False
+        db_table = 'Complaints'
