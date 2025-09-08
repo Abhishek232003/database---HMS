@@ -1,0 +1,14 @@
+-- Create the Complaints table
+CREATE TABLE Complaints (
+    ComplaintID INT PRIMARY KEY,
+    STDID INT,
+    RoomNumber VARCHAR(20),
+    ComplaintText TEXT,
+    ComplaintDate DATE,
+    Status VARCHAR(50),
+    FOREIGN KEY (STDID) REFERENCES STUDENTS(STDID) ON UPDATE CASCADE,
+    FOREIGN KEY (RoomNumber) REFERENCES ROOM(RoomNumber) ON DELETE SET NULL ON UPDATE CASCADE
+);
+
+-- Students can insert complaints into this table, including their room number.
+-- Wardern can read all complaints from this table.
