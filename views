@@ -1,0 +1,87 @@
+from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate, login
+from django.contrib import messages
+from django.contrib.auth.models import Group
+from .sync_utils import sync_wardens_to_django
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
+from .forms import WardenLoginForm
+from django.db import connection
+from .models import Wardern, Students, Room, Complaints
+
+# Create your views here.
+
+def warden_login_view(request):
+    sync_wardens_to_django()  # Always sync before login
+    if request.method == 'POST':
+        form = WardenLoginForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password']
+            user = authenticate(request, username=username, password=password)
+            if user is not None:
+                if user.groups.filter(name='warden').exists():
+                    login(request, user)
+                    return redirect('warden_dashboard')  # You can define this URL later
+                else:
+                    messages.error(request, 'You are not authorized as a warden.')
+            else:
+                messages.error(request, 'Invalid username or password')
+    else:
+        form = WardenLoginForm()
+    return render(request, 'warden_auth/login.html', {'form': form})
+
+@login_required
+def warden_dashboard(request):
+    # Fetch the warden's name and info from the WARDERN table
+    warden_name = None
+    warden_info = None
+    try:
+        warden_obj = Wardern.objects.get(wardername__iexact=request.user.username.replace('_', ' '))
+        warden_name = warden_obj.wardername
+        warden_info = warden_obj
+    except Wardern.DoesNotExist:
+        warden_name = request.user.username
+        warden_info = None
+
+    # Fetch all students
+    students = Students.objects.all()
+
+    # Fetch all rooms and map to students
+    rooms = Room.objects.all()
+    room_map = {}
+    for room in rooms:
+        room_map[room.roomnumber] = room
+    # Build a list of rooms with student info
+    rooms_with_students = []
+    for room in rooms:
+        student = None
+        if room.studentid:
+            student = students.filter(stdid=room.studentid).first()
+        rooms_with_students.append({
+            'room': room,
+            'student': student
+        })
+
+    # Fetch all complaints
+    complaints = Complaints.objects.all()
+
+    context = {
+        'warden_name': warden_name,
+        'warden_info': warden_info,
+        'students': students,
+        'rooms_with_students': rooms_with_students,
+        'complaints': complaints,
+    }
+    return render(request, 'warden_auth/dashboard.html', context)
+
+@login_required
+def warden_personal_info(request):
+    warden_info = None
+    from .models import Wardern
+    try:
+        warden_obj = Wardern.objects.get(wardername__iexact=request.user.username.replace('_', ' '))
+        warden_info = warden_obj
+    except Wardern.DoesNotExist:
+        warden_info = None
+    return render(request, 'warden_auth/personal_info.html', {'warden_info': warden_info})
