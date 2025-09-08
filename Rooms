@@ -1,0 +1,25 @@
+-- Create the ROOM table
+CREATE TABLE ROOM (
+    RoomNumber VARCHAR(20) PRIMARY KEY,
+    RoomType VARCHAR(10), -- AC or NONAC
+    Floor INT
+);
+
+-- Alter ROOM table to drop StudentName column if it exists
+ALTER TABLE ROOM DROP COLUMN StudentName;
+
+-- Alter ROOM table to add StudentID column as a foreign key
+ALTER TABLE ROOM ADD StudentID INT;
+ALTER TABLE ROOM ADD CONSTRAINT fk_room_student FOREIGN KEY (StudentID) REFERENCES STUDENTS(STDID) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- View to show total number of rooms
+CREATE VIEW TOTAL_ROOMS AS
+SELECT COUNT(*) AS TotalRooms FROM ROOM;
+
+-- View to show number of rooms occupied
+CREATE VIEW ROOMS_OCCUPIED AS
+SELECT COUNT(*) AS RoomsOccupied FROM ROOM WHERE StudentID IS NOT NULL;
+
+-- View to show number of rooms available
+CREATE VIEW ROOMS_AVAILABLE AS
+SELECT COUNT(*) AS RoomsAvailable FROM ROOM WHERE StudentID IS NULL; 
